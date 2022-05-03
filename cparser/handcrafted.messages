@@ -4803,6 +4803,224 @@ At this point, a semicolon ';' is expected.
 
 #------------------------------------------------------------------------------
 
+translation_unit_file: ALIGNAS LPAREN GENERIC XOR_ASSIGN
+##
+## Ends in an error in state: 35.
+##
+## generic_selection -> GENERIC . LPAREN assignment_expression COMMA generic_assoc_list RPAREN [ XOR_ASSIGN SUB_ASSIGN STAR SLASH SEMICOLON RPAREN RIGHT_ASSIGN RIGHT RBRACK RBRACE QUESTION PTR PLUS PERCENT OR_ASSIGN NEQ MUL_ASSIGN MOD_ASSIGN MINUS LT LPAREN LEQ LEFT_ASSIGN LEFT LBRACK INC HAT GT GEQ EQEQ EQ DOT DIV_ASSIGN DEC COMMA COLON BARBAR BAR AND_ASSIGN ANDAND AND ADD_ASSIGN ]
+##
+## The known suffix of the stack is as follows:
+## GENERIC
+##
+
+Ill-formed _Generic expression.
+At this point, an opening parenthesis '(' is expected.
+
+#------------------------------------------------------------------------------
+
+translation_unit_file: ALIGNAS LPAREN GENERIC LPAREN XOR_ASSIGN
+##
+## Ends in an error in state: 36.
+##
+## generic_selection -> GENERIC LPAREN . assignment_expression COMMA generic_assoc_list RPAREN [ XOR_ASSIGN SUB_ASSIGN STAR SLASH SEMICOLON RPAREN RIGHT_ASSIGN RIGHT RBRACK RBRACE QUESTION PTR PLUS PERCENT OR_ASSIGN NEQ MUL_ASSIGN MOD_ASSIGN MINUS LT LPAREN LEQ LEFT_ASSIGN LEFT LBRACK INC HAT GT GEQ EQEQ EQ DOT DIV_ASSIGN DEC COMMA COLON BARBAR BAR AND_ASSIGN ANDAND AND ADD_ASSIGN ]
+##
+## The known suffix of the stack is as follows:
+## GENERIC LPAREN
+##
+
+Ill-formed _Generic expression.
+At this point, an expression is expected.
+
+#------------------------------------------------------------------------------
+
+translation_unit_file: ALIGNAS LPAREN GENERIC LPAREN STRING_LITERAL WHILE
+##
+## Ends in an error in state: 374.
+##
+## generic_selection -> GENERIC LPAREN assignment_expression . COMMA generic_assoc_list RPAREN [ XOR_ASSIGN SUB_ASSIGN STAR SLASH SEMICOLON RPAREN RIGHT_ASSIGN RIGHT RBRACK RBRACE QUESTION PTR PLUS PERCENT OR_ASSIGN NEQ MUL_ASSIGN MOD_ASSIGN MINUS LT LPAREN LEQ LEFT_ASSIGN LEFT LBRACK INC HAT GT GEQ EQEQ EQ DOT DIV_ASSIGN DEC COMMA COLON BARBAR BAR AND_ASSIGN ANDAND AND ADD_ASSIGN ]
+##
+## The known suffix of the stack is as follows:
+## GENERIC LPAREN assignment_expression
+##
+## WARNING: This example involves spurious reductions.
+## This implies that, although the LR(1) items shown above provide an
+## accurate view of the past (what has been recognized so far), they
+## may provide an INCOMPLETE view of the future (what was expected next).
+## In state 70, spurious reduction of production primary_expression -> string_literals_list
+## In state 72, spurious reduction of production postfix_expression -> primary_expression
+## In state 73, spurious reduction of production unary_expression -> postfix_expression
+## In state 77, spurious reduction of production cast_expression -> unary_expression
+## In state 101, spurious reduction of production multiplicative_expression -> cast_expression
+## In state 94, spurious reduction of production additive_expression -> multiplicative_expression
+## In state 114, spurious reduction of production shift_expression -> additive_expression
+## In state 90, spurious reduction of production relational_expression -> shift_expression
+## In state 107, spurious reduction of production equality_expression -> relational_expression
+## In state 123, spurious reduction of production and_expression -> equality_expression
+## In state 131, spurious reduction of production exclusive_or_expression -> and_expression
+## In state 132, spurious reduction of production inclusive_or_expression -> exclusive_or_expression
+## In state 133, spurious reduction of production logical_and_expression -> inclusive_or_expression
+## In state 117, spurious reduction of production logical_or_expression -> logical_and_expression
+## In state 115, spurious reduction of production conditional_expression -> logical_or_expression
+## In state 136, spurious reduction of production assignment_expression -> conditional_expression
+##
+
+Ill-formed _Generic expression.
+Up to this point, an expression has been recognized:
+  $0
+If this expression is complete,
+then at this point, a comma ',' is expected.
+
+#------------------------------------------------------------------------------
+
+translation_unit_file: ALIGNAS LPAREN GENERIC LPAREN STRING_LITERAL COMMA XOR_ASSIGN
+##
+## Ends in an error in state: 375.
+##
+## generic_selection -> GENERIC LPAREN assignment_expression COMMA . generic_assoc_list RPAREN [ XOR_ASSIGN SUB_ASSIGN STAR SLASH SEMICOLON RPAREN RIGHT_ASSIGN RIGHT RBRACK RBRACE QUESTION PTR PLUS PERCENT OR_ASSIGN NEQ MUL_ASSIGN MOD_ASSIGN MINUS LT LPAREN LEQ LEFT_ASSIGN LEFT LBRACK INC HAT GT GEQ EQEQ EQ DOT DIV_ASSIGN DEC COMMA COLON BARBAR BAR AND_ASSIGN ANDAND AND ADD_ASSIGN ]
+##
+## The known suffix of the stack is as follows:
+## GENERIC LPAREN assignment_expression COMMA
+##
+
+Ill-formed _Generic expression.
+At this point, either a type name or 'default' are expected.
+
+#------------------------------------------------------------------------------
+
+translation_unit_file: ALIGNAS LPAREN GENERIC LPAREN STRING_LITERAL COMMA DEFAULT XOR_ASSIGN
+##
+## Ends in an error in state: 376.
+##
+## generic_association -> DEFAULT . COLON assignment_expression [ RPAREN COMMA ]
+##
+## The known suffix of the stack is as follows:
+## DEFAULT
+##
+
+Ill-formed _Generic expression.
+At this point, a colon ':' is expected.
+
+#------------------------------------------------------------------------------
+
+translation_unit_file: ALIGNAS LPAREN GENERIC LPAREN STRING_LITERAL COMMA DEFAULT COLON XOR_ASSIGN
+##
+## Ends in an error in state: 377.
+##
+## generic_association -> DEFAULT COLON . assignment_expression [ RPAREN COMMA ]
+##
+## The known suffix of the stack is as follows:
+## DEFAULT COLON
+##
+
+Ill-formed _Generic expression.
+At this point, an expression is expected.
+
+#------------------------------------------------------------------------------
+
+translation_unit_file: ALIGNAS LPAREN GENERIC LPAREN STRING_LITERAL COMMA CHAR XOR_ASSIGN
+##
+## Ends in an error in state: 379.
+##
+## generic_association -> type_name . COLON assignment_expression [ RPAREN COMMA ]
+##
+## The known suffix of the stack is as follows:
+## type_name
+##
+## WARNING: This example involves spurious reductions.
+## This implies that, although the LR(1) items shown above provide an
+## accurate view of the past (what has been recognized so far), they
+## may provide an INCOMPLETE view of the future (what was expected next).
+## In state 159, spurious reduction of production specifier_qualifier_list(type_name) -> type_specifier_no_typedef_name list(specifier_qualifier_no_typedef_name)
+## In state 317, spurious reduction of production option(abstract_declarator(type_name)) ->
+## In state 323, spurious reduction of production type_name -> specifier_qualifier_list(type_name) option(abstract_declarator(type_name))
+##
+
+Ill-formed _Generic expression.
+Up to this point, a type name has been recognized:
+  $0
+At this point, a colon ':' is expected.
+
+#------------------------------------------------------------------------------
+
+translation_unit_file: ALIGNAS LPAREN GENERIC LPAREN STRING_LITERAL COMMA CHAR COLON XOR_ASSIGN
+##
+## Ends in an error in state: 380.
+##
+## generic_association -> type_name COLON . assignment_expression [ RPAREN COMMA ]
+##
+## The known suffix of the stack is as follows:
+## type_name COLON
+##
+
+Ill-formed _Generic expression.
+Up to this point, a type name followed by a colon have been recognized:
+  $0
+At this point, an expression is expected.
+
+#------------------------------------------------------------------------------
+
+translation_unit_file: ALIGNAS LPAREN GENERIC LPAREN STRING_LITERAL COMMA CHAR COLON STRING_LITERAL WHILE
+##
+## Ends in an error in state: 383.
+##
+## generic_assoc_list -> generic_assoc_list . COMMA generic_association [ RPAREN COMMA ]
+## generic_selection -> GENERIC LPAREN assignment_expression COMMA generic_assoc_list . RPAREN [ XOR_ASSIGN SUB_ASSIGN STAR SLASH SEMICOLON RPAREN RIGHT_ASSIGN RIGHT RBRACK RBRACE QUESTION PTR PLUS PERCENT OR_ASSIGN NEQ MUL_ASSIGN MOD_ASSIGN MINUS LT LPAREN LEQ LEFT_ASSIGN LEFT LBRACK INC HAT GT GEQ EQEQ EQ DOT DIV_ASSIGN DEC COMMA COLON BARBAR BAR AND_ASSIGN ANDAND AND ADD_ASSIGN ]
+##
+## The known suffix of the stack is as follows:
+## GENERIC LPAREN assignment_expression COMMA generic_assoc_list
+##
+## WARNING: This example involves spurious reductions.
+## This implies that, although the LR(1) items shown above provide an
+## accurate view of the past (what has been recognized so far), they
+## may provide an INCOMPLETE view of the future (what was expected next).
+## In state 70, spurious reduction of production primary_expression -> string_literals_list
+## In state 72, spurious reduction of production postfix_expression -> primary_expression
+## In state 73, spurious reduction of production unary_expression -> postfix_expression
+## In state 77, spurious reduction of production cast_expression -> unary_expression
+## In state 101, spurious reduction of production multiplicative_expression -> cast_expression
+## In state 94, spurious reduction of production additive_expression -> multiplicative_expression
+## In state 114, spurious reduction of production shift_expression -> additive_expression
+## In state 90, spurious reduction of production relational_expression -> shift_expression
+## In state 107, spurious reduction of production equality_expression -> relational_expression
+## In state 123, spurious reduction of production and_expression -> equality_expression
+## In state 131, spurious reduction of production exclusive_or_expression -> and_expression
+## In state 132, spurious reduction of production inclusive_or_expression -> exclusive_or_expression
+## In state 133, spurious reduction of production logical_and_expression -> inclusive_or_expression
+## In state 117, spurious reduction of production logical_or_expression -> logical_and_expression
+## In state 115, spurious reduction of production conditional_expression -> logical_or_expression
+## In state 136, spurious reduction of production assignment_expression -> conditional_expression
+## In state 381, spurious reduction of production generic_association -> type_name COLON assignment_expression
+## In state 382, spurious reduction of production generic_assoc_list -> generic_association
+##
+
+Ill-formed _Generic expression.
+Up to this point, one or several generic associations have been recognized:
+  $0
+At this point, either a closing parenthesis ')' or a comma ',' are expected.
+Use a closing parenthesis ')' to terminate the _Generic expression.
+Use a comma to add another generic association.
+
+#------------------------------------------------------------------------------
+
+translation_unit_file: ALIGNAS LPAREN GENERIC LPAREN STRING_LITERAL COMMA CHAR COLON STRING_LITERAL COMMA XOR_ASSIGN
+##
+## Ends in an error in state: 385.
+##
+## generic_assoc_list -> generic_assoc_list COMMA . generic_association [ RPAREN COMMA ]
+##
+## The known suffix of the stack is as follows:
+## generic_assoc_list COMMA
+##
+
+Ill-formed _Generic expression.
+Up to this point, one or several generic associations have been recognized,
+followed by a comma ',':
+  $0
+At this point, another generic association is expected.
+It should start either with a type name or with the 'default' keyword.
+
+#------------------------------------------------------------------------------
+
 translation_unit_file: ALIGNAS LPAREN PRE_NAME XOR_ASSIGN
 ##
 ## Ends in an error in state: 29.
