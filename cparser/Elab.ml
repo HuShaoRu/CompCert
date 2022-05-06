@@ -1777,14 +1777,18 @@ let elab_expr ctx loc env a =
       and default_match = function
         | (None, _) -> true
         | (Some _, _) -> false in
-      begin match List.find_opt exact_match bssoc with
-      | Some (_, b) -> (b,env)
-      | None ->
+      begin match List.filter exact_match bssoc with
+      | (_, b) :: others ->
+          if others <> [] then
+            error "'_Generic' selector of type %a is compatible with several associations"
+                  (print_typ env) ty;
+          (b,env)
+      | [] ->
           match List.find_opt default_match bssoc with
           | Some (_, b) -> (b,env)
           | None ->
               fatal_error "'_Generic' selector of type %a is not compatible with any association"
-                (print_typ env) ty
+                          (print_typ env) ty
       end
 
 (* 6.5.2 Postfix expressions *)
