@@ -44,6 +44,9 @@
 /riscV/ConstpropOp.v
 /riscV/SelectOp.v
 /riscV/SelectLong.v
+/loongarch/ConstpropOp.v
+/loongarch/SelectOp.v
+/loongarch/SelectLong.v
 /aarch64/ConstpropOp.v
 /aarch64/SelectOp.v
 /aarch64/SelectLong.v

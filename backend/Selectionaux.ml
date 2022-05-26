@@ -78,6 +78,7 @@ let fast_cmove ty =
   | "riscV", _ -> false
   | "x86", _ -> 
       (match ty with Tint -> true | Tlong -> Archi.ptr64 | _ -> false)
+  | "loongarch", _ -> false
   | _, _ ->
       assert false
 

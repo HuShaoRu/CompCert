@@ -22,6 +22,7 @@ int clobbers(int x, int z)
 
 #if (defined(ARCH_x86) && defined(MODEL_64)) \
  || (defined(ARCH_riscV) && defined(MODEL_64)) \
+ || (defined(ARCH_loongarch) && defined(MODEL_64)) \
  || (defined(ARCH_powerpc) && defined(MODEL_ppc64)) \
  || (defined(ARCH_powerpc) && defined(MODEL_e5500)) \
  || defined(ARCH_aarch64)

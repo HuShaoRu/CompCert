@@ -246,6 +246,15 @@ let aarch64 =
 let aarch64_apple =
   { aarch64 with char_signed = true }
 
+let loongarch32 =
+  { ilp32ll64 with name = "loongarch32"; char_signed = true;
+                   struct_passing_style = SP_ref_callee; (* Wrong *)
+                   struct_return_style = SR_ref } (* to check *)
+let loongarch64 =
+  { i32lpll64 with name = "loongarch64"; char_signed = true;
+                   struct_passing_style = SP_ref_callee; (* Wrong *)
+                   struct_return_style = SR_ref } (* to check *)
+
 (* Add GCC extensions re: sizeof and alignof *)
 
 let gcc_extensions c =

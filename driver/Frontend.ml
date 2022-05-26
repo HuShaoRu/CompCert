@@ -119,6 +119,9 @@ let init () =
     | "aarch64" -> if Configuration.abi = "apple"
                    then Machine.aarch64_apple
                    else Machine.aarch64
+    | "loongarch" -> if Configuration.model = "64"
+                    then Machine.loongarch64
+                    else Machine.loongarch32
     | _         -> assert false
   end;
   Env.set_builtins C2C.builtins;

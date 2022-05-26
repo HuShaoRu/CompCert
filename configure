@@ -60,6 +60,8 @@ Supported targets:
   rv64-linux           (RISC-V 64 bits, Linux)
   aarch64-linux        (AArch64, i.e. ARMv8 in 64-bit mode, Linux)
   aarch64-macos        (AArch64, i.e. Apple silicon, MacOS)
+  loongarch64-linux    (LoongArch64)
+  loongarch32-linux    (LoongArch32)
   manual               (edit configuration file by hand)
 
 For x86 targets, the "x86_32-" prefix can also be written "ia32-" or "i386-".
@@ -192,6 +194,10 @@ case "$target" in
       arch="riscV"; model="64"; endianness="little"; bitsize=64;;
   aarch64-*|arm64-*)
       arch="aarch64"; model="default"; endianness="little"; bitsize=64;;
+  loongarch32-*)
+      arch="loongarch"; model="32"; endianness="little"; bitsize=32;;
+  loongarch64-*)
+      arch="loongarch"; model="64"; endianness="little"; bitsize=64;;
   manual)
       ;;
   "")
@@ -429,6 +435,23 @@ if test "$arch" = "aarch64"; then
   esac
 fi
 
+#
+# LoongArch Target Configuration
+#
+if test "$arch" = "loongarch"; then
+  if test "$model" = "64"; then
+    model_options="-march=loongarch64 -mabi=lp64"
+  else
+    model_options="-march=loongarch32 -mabi=lp32"
+  fi
+  abi="standard"
+  cc_options="$model_options"
+  casm_options="$model_options -c"
+  clinker_options="$model_options"
+  cprepro_options="$model_options -std=c99 -U__GNUC__ -E"
+  system="linux"
+fi
+
 
 #
 # Finalize Target Configuration
@@ -664,6 +687,7 @@ cat >> Makefile.config <<'EOF'
 # ARCH=x86
 # ARCH=riscV
 # ARCH=aarch6
+# ARCH=loongarch
 ARCH=
 
 # Hardware variant
@@ -688,13 +712,13 @@ MODEL=
 ABI=
 
 # Target bit width
-# BITSIZE=64        # for x86 in 64-bit mode, RiscV in 64-bit mode, AArch64
+# BITSIZE=64        # for x86 in 64-bit mode, RiscV in 64-bit mode, AArch64, LoongArch in 64-bit mode
 # BITSIZE=32        # otherwise
 BITSIZE=
 
 # Target endianness
 # ENDIANNESS=big     # for ARM or PowerPC
-# ENDIANNESS=little  # for ARM or x86 or RiscV or AArch64
+# ENDIANNESS=little  # for ARM or x86 or RiscV or AArch64 or LoongArch
 ENDIANNESS=
 
 # Target operating system and development environment
@@ -703,7 +727,7 @@ ENDIANNESS=
 # SYSTEM=linux
 # SYSTEM=diab
 #
-# Possible choices for ARM, AArch64, RiscV:
+# Possible choices for ARM, AArch64, RiscV, LoongArch:
 # SYSTEM=linux
 #
 # Possible choices for x86:
