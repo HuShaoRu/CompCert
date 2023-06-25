@@ -52,7 +52,7 @@ Definition make_immed32 (val: int) :=
   if Int.eq val lo then
     Imm32_single val
   else
-    let hi := Int.shr (Int.sub val lo) (Int.repr 12) in
+    let hi := Int.shru (Int.sub val lo) (Int.repr 12) in
     Imm32_pair hi lo.
 
 (** Likewise, for 64-bit integer constants. *)
@@ -60,40 +60,34 @@ Definition make_immed32 (val: int) :=
 Inductive immed64 : Type :=
   | Imm64_single (imm: int64)
   | Imm64_pair   (hi: int64) (lo: int64)
-  | Imm64_large  (hi12: int64) (hi20: int64) (lo20: int64) (lo12: int64).
+  | Imm64_large  (imm: int64).
+
 
 Definition make_immed64 (val: int64) :=
   let lo := Int64.sign_ext 12 val in
-  if Int64.eq val lo then
-    Imm64_single val
+  if Int64.eq val lo then 
+    Imm64_single lo 
   else
-    let hi := Int64.shr (Int64.sub val lo) (Int64.repr 12) in
+    let hi := Int64.sign_ext 20 (Int64.shru (Int64.sub val lo) (Int64.repr 12)) in
     if Int64.eq val (Int64.add (Int64.sign_ext 32 (Int64.shl hi (Int64.repr 12))) lo) then
       Imm64_pair hi lo
     else
-      let lo12 := Int64.zero_ext 12 val in
-      let lo20 := Int64.sign_ext 20 (Int64.shr val (Int64.repr 12)) in
-      let hi20 := Int64.sign_ext 20 (Int64.shr val (Int64.repr 32)) in
-      let hi12 := Int64.sign_ext 12 (Int64.shr val (Int64.repr 52)) in
-      Imm64_large hi12 hi20 lo20 lo12.
+      Imm64_large val.
 
 (** Smart constructors for arithmetic operations involving
   a 32-bit or 64-bit integer constant.  Depending on whether the
   constant fits in 12 bits or not, one or several instructions
   are generated as required to perform the operation
   and prepended to the given instruction sequence [k]. *)
-
+    
 Definition load_hilo32 (r: ireg) (hi lo: int) k :=
   let n := Int.add (Int.shl hi (Int.repr 12)) lo in
   let lo12 := Int.zero_ext 12 n in
-  let hi20 := Int.shr n (Int.repr 12) in
-  if Int.eq lo12 Int.zero then
-    Plu12iw r hi20 :: k
-  else if Int.eq lo12 n then
-    Poriw r R0 lo12 :: k
-  else
-    Plu12iw r hi20 :: Poriw r r lo12 :: k.
-  
+  let hi_ := Int.shru n (Int.repr 12) in
+  let hi20 := Int.add hi_ (Int.shl (Int.shru (Int.shr n (Int.repr 12)) (Int.repr 20)) (Int.repr 20)) in
+  if Int.eq lo12 Int.zero then Plu12iw r hi20 :: k
+  else Plu12iw r hi20 :: Poriw r r lo12 :: k.
+    
 Definition loadimm32 (r: ireg) (n: int) (k: code) :=
   match make_immed32 n with
   | Imm32_single imm => Paddiw r R0 imm :: k
@@ -132,24 +126,14 @@ Definition load_lolo64 (r: ireg) (lo20 lo12: int64) k :=
     Plu12id r lo20 :: Porid r r lo12 :: k.
   
 Definition load_hilo64 (r: ireg) (hi lo: int64) k :=
-  let n := Int64.add (Int64.sign_ext 32 (Int64.shl hi (Int64.repr 12))) lo in
-  let lo12 := Int64.zero_ext 12 n in
-  let lo20 := Int64.shr n (Int64.repr 12) in
-  load_lolo64 r lo20 lo12 k.
-
-Definition load_large64 (r: ireg) (hi12 hi20 lo20 lo12: int64) k :=
-  if Int64.eq hi20 (Int64.shr (Int64.sign_ext 20 lo20) (Int64.repr 44)) then
-    load_lolo64 r lo20 lo12 (Plu52id r r hi12 :: k)
-  else if Int64.eq hi12 (Int64.shr (Int64.sign_ext 20 hi20) (Int64.repr 52)) then
-    load_lolo64 r lo20 lo12 (Plu32id r hi20 :: k)
-  else
-    load_lolo64 r lo20 lo12 (Plu32id r hi20 :: Plu52id r r hi12 :: k).
+  if Int64.eq lo Int64.zero then Plu12id r hi :: k
+  else Plu12id r hi :: Paddid r r lo :: k.
 
 Definition loadimm64 (r: ireg) (n: int64) (k: code) :=
   match make_immed64 n with
   | Imm64_single imm => Paddid r R0 imm :: k
   | Imm64_pair hi lo => load_hilo64 r hi lo k
-  | Imm64_large hi12 hi20 lo20 lo12 => load_large64 r hi12 hi20 lo20 lo12 k
+  | Imm64_large imm  => Ploadli r imm :: k
   end.
 
 Definition opsi64 (op: ireg -> ireg0 -> ireg0 -> instruction)
@@ -158,7 +142,7 @@ Definition opsi64 (op: ireg -> ireg0 -> ireg0 -> instruction)
   match make_immed64 n with
   | Imm64_single imm => opimm rd rs imm :: k
   | Imm64_pair hi lo => load_hilo64 R20 hi lo (op rd rs R20 :: k)
-  | Imm64_large hi12 hi20 lo20 lo12 => load_large64 R20 hi12 hi20 lo20 lo12 (op rd rs R20 :: k)
+  | Imm64_large imm  => Ploadli R20 imm :: op rd rs R20 :: k
   end.
 
 Definition opui64 (op: ireg -> ireg0 -> ireg0 -> instruction)
@@ -259,8 +243,8 @@ Definition transl_cbranch
       do r1 <- ireg_of a1;
       OK (if Int.eq n Int.zero then
             match c with
-            | Ceq => Pbeqzd r1 lbl :: k
-            | Cne => Pbnezd r1 lbl :: k
+            | Ceq => Pbeqw r1 R0 lbl :: k
+            | Cne => Pbnew r1 R0 lbl :: k
             | _ => transl_cbranch_int32s c r1 R0 lbl :: k
             end
           else
@@ -269,8 +253,8 @@ Definition transl_cbranch
       do r1 <- ireg_of a1;
       OK (if Int.eq n Int.zero then
             match c with
-            | Ceq => Pbeqzd r1 lbl :: k
-            | Cne => Pbnezd r1 lbl :: k
+            | Ceq => Pbeqw r1 R0 lbl :: k
+            | Cne => Pbnew r1 R0 lbl :: k
             | _ => transl_cbranch_int32u c r1 R0 lbl :: k
             end
           else
@@ -285,8 +269,8 @@ Definition transl_cbranch
       do r1 <- ireg_of a1;
       OK (if Int64.eq n Int64.zero then
             match c with
-            | Ceq => Pbeqzd r1 lbl :: k
-            | Cne => Pbnezd r1 lbl :: k
+            | Ceq => Pbeqd r1 R0 lbl :: k
+            | Cne => Pbned r1 R0 lbl :: k
             | _ => transl_cbranch_int64s c r1 R0 lbl :: k
             end
           else
@@ -295,8 +279,8 @@ Definition transl_cbranch
       do r1 <- ireg_of a1;
       OK (if Int64.eq n Int64.zero then
             match c with
-            | Ceq => Pbeqzd r1 lbl :: k
-            | Cne => Pbnezd r1 lbl :: k
+            | Ceq => Pbeqd r1 R0 lbl :: k
+            | Cne => Pbned r1 R0 lbl :: k
             | _ => transl_cbranch_int64u c r1 R0 lbl :: k
             end
           else
@@ -304,19 +288,19 @@ Definition transl_cbranch
   | Ccompf c, f1 :: f2 :: nil =>
       do r1 <- freg_of f1; do r2 <- freg_of f2;
       let (insn, normal) := transl_cond_float c FCC0 r1 r2 in
-      OK (insn :: (if normal then Pbcnez FCC0 lbl else Pbceqz FCC0 lbl) :: k)
+      OK (insn :: Pmovcf2gr R20 FCC0 :: (if normal then Pbnew R20 R0 lbl else Pbeqw R20 R0 lbl) :: k)
   | Cnotcompf c, f1 :: f2 :: nil =>
       do r1 <- freg_of f1; do r2 <- freg_of f2;
       let (insn, normal) := transl_cond_float c FCC0 r1 r2 in
-      OK (insn :: (if normal then Pbceqz FCC0 lbl else Pbcnez FCC0 lbl) :: k)
+      OK (insn :: Pmovcf2gr R20 FCC0 :: (if normal then Pbeqw R20 R0 lbl else Pbnew R20 R0 lbl) :: k)
   | Ccompfs c, f1 :: f2 :: nil =>
       do r1 <- freg_of f1; do r2 <- freg_of f2;
       let (insn, normal) := transl_cond_single c FCC0 r1 r2 in
-      OK (insn :: (if normal then Pbcnez FCC0 lbl else Pbceqz FCC0 lbl) :: k)
+      OK (insn :: Pmovcf2gr R20 FCC0 :: (if normal then Pbnew R20 R0 lbl else Pbeqw R20 R0 lbl) :: k)
   | Cnotcompfs c, f1 :: f2 :: nil =>
       do r1 <- freg_of f1; do r2 <- freg_of f2;
       let (insn, normal) := transl_cond_single c FCC0 r1 r2 in
-      OK (insn :: (if normal then Pbceqz FCC0 lbl else Pbcnez FCC0 lbl) :: k)
+      OK (insn :: Pmovcf2gr R20 FCC0 :: (if normal then Pbeqw R20 R0 lbl else Pbnew R20 R0 lbl) :: k)
   | _, _ =>
       Error(msg "Asmgen.transl_cond_branch")
   end.
@@ -431,19 +415,19 @@ Definition transl_cond_op
   | Ccompf c, f1 :: f2 :: nil =>
       do r1 <- freg_of f1; do r2 <- freg_of f2;
       let (insn, normal) := transl_cond_float c FCC0 r1 r2 in
-      OK (insn :: Porw rd R0 R0 :: Pmovcf2gr rd FCC0 :: if normal then k else Pxoriw rd rd Int.one :: k)
+      OK (insn :: Pmovcf2gr rd FCC0 :: if normal then k else Pxoriw rd rd Int.one :: k)
   | Cnotcompf c, f1 :: f2 :: nil =>
       do r1 <- freg_of f1; do r2 <- freg_of f2;
       let (insn, normal) := transl_cond_float c FCC0 r1 r2 in
-      OK (insn :: Porw rd R0 R0 :: Pmovcf2gr rd FCC0 :: if normal then Pxoriw rd rd Int.one :: k else k)
+      OK (insn :: Pmovcf2gr rd FCC0 :: if normal then Pxoriw rd rd Int.one :: k else k)
   | Ccompfs c, f1 :: f2 :: nil =>
       do r1 <- freg_of f1; do r2 <- freg_of f2;
       let (insn, normal) := transl_cond_single c FCC0 r1 r2 in
-      OK (insn :: Porw rd R0 R0 :: Pmovcf2gr rd FCC0 :: if normal then k else Pxoriw rd rd Int.one :: k)
+      OK (insn :: Pmovcf2gr rd FCC0 :: if normal then k else Pxoriw rd rd Int.one :: k)
   | Cnotcompfs c, f1 :: f2 :: nil =>
       do r1 <- freg_of f1; do r2 <- freg_of f2;
       let (insn, normal) := transl_cond_single c FCC0 r1 r2 in
-      OK (insn :: Porw rd R0 R0 :: Pmovcf2gr rd FCC0 :: if normal then Pxoriw rd rd Int.one :: k else k)
+      OK (insn :: Pmovcf2gr rd FCC0 :: if normal then Pxoriw rd rd Int.one :: k else k)
   | _, _ =>
       Error(msg "Asmgen.transl_cond_op")
   end.
@@ -765,8 +749,8 @@ Definition indexed_memory_access
         mk_instr base (Ofsimm (Ptrofs.of_int64 imm)) :: k
     | Imm64_pair hi lo =>
         Plu12id R20 hi :: Paddd R20 base R20 :: mk_instr R20 (Ofsimm (Ptrofs.of_int64 lo)) :: k
-    | Imm64_large hi12 hi20 lo20 lo12 =>
-        load_large64 R20 hi12 hi20 lo20 lo12 (Paddd R20 base R20 :: mk_instr R20 (Ofsimm Ptrofs.zero) :: k)
+    | Imm64_large imm =>
+        Ploadli R20 imm :: Paddd R20 base R20 :: mk_instr R20 (Ofsimm Ptrofs.zero) :: k
     end
   else
     match make_immed32 (Ptrofs.to_int ofs) with
@@ -816,12 +800,19 @@ Definition transl_memory_access
       do rs <- ireg_of a1;
       OK (indexed_memory_access mk_instr rs ofs k)
   | Aglobal id ofs, nil =>
-      match make_immed32 (Ptrofs.to_int ofs) with
-      | Imm32_single imm => OK (Ploadsymbol R20 id :: mk_instr R20 (Ofsimm ofs) :: k)
-      | Imm32_pair hi lo => OK (Ploadsymbol R20 id :: Plu12iw R22 hi ::
-                                (if Archi.ptr64 then Paddd R20 R20 R22 else Paddw R20 R20 R22) ::
-                                mk_instr R20 (Ofsimm (Ptrofs.of_ints lo)) :: k)
-      end
+      if Archi.ptr64 then
+        match make_immed64 (Ptrofs.to_int64 ofs) with
+        | Imm64_single imm => OK (Ploadsymbol R20 id :: mk_instr R20 (Ofsimm ofs) :: k)
+        | Imm64_pair hi lo => OK (Ploadsymbol R20 id :: Plu12id R22 hi :: Paddd R20 R20 R22 ::
+                                    mk_instr R20 (Ofsimm (Ptrofs.of_int64 lo)) :: k)
+        | Imm64_large imm => OK (Ploadsymbol R20 id :: mk_instr R20 (Ofsimm ofs) :: k)
+        end
+      else
+        match make_immed32 (Ptrofs.to_int ofs) with
+        | Imm32_single imm => OK (Ploadsymbol R20 id :: mk_instr R20 (Ofsimm ofs) :: k)
+        | Imm32_pair hi lo => OK (Ploadsymbol R20 id :: Plu12iw R22 hi :: Paddw R20 R20 R22 ::
+                                    mk_instr R20 (Ofsimm (Ptrofs.of_int lo)) :: k)
+        end
   | Ainstack ofs, nil =>
       OK (indexed_memory_access mk_instr SP ofs k)
   | _, _ =>

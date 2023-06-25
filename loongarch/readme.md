@@ -1,6 +1,7 @@
 # CompCert on LoongArch
 
 Not finished yet. Still remain `Admitted` in some proofs.
+Admitted solved.
 
 Not tested on LoongArch32.
 
