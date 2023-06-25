@@ -126,9 +126,6 @@ Definition load_lolo64 (r: ireg) (lo20 lo12: int64) k :=
     Plu12id r lo20 :: Porid r r lo12 :: k.
   
 Definition load_hilo64 (r: ireg) (hi lo: int64) k :=
-  (* let lo20 := Int64.sign_ext 20 hi in
-  if Int64.eq lo Int64.zero then Plu12id r lo20 :: k
-  else Plu12id r lo20 :: Paddid r r lo :: k. *)
   if Int64.eq lo Int64.zero then Plu12id r hi :: k
   else Plu12id r hi :: Paddid r r lo :: k.
 
@@ -816,19 +813,6 @@ Definition transl_memory_access
         | Imm32_pair hi lo => OK (Ploadsymbol R20 id :: Plu12iw R22 hi :: Paddw R20 R20 R22 ::
                                     mk_instr R20 (Ofsimm (Ptrofs.of_int lo)) :: k)
         end
-      (* if Archi.ptr64 then
-        match make_immed64 (Ptrofs.to_int64 ofs) with
-        | Imm64_single imm => OK (Ploadsymbol R20 id :: mk_instr R20 (Ofsimm ofs) :: k)
-        | Imm64_pair hi lo => OK (Ploadsymbol_ofs R20 id (Ptrofs.of_int64 (Int64.sign_ext 32 (Int64.shl hi (Int64.repr 12)))) ::
-                                    mk_instr R20 (Ofsimm (Ptrofs.of_int64 lo)) :: k)
-        | Imm64_large imm => OK (Ploadsymbol_ofs R20 id (Ptrofs.of_int64 imm) :: mk_instr R20 (Ofsimm Ptrofs.zero) :: k)
-        end
-      else
-        match make_immed32 (Ptrofs.to_int ofs) with
-        | Imm32_single imm => OK (Ploadsymbol R20 id :: mk_instr R20 (Ofsimm ofs) :: k)
-        | Imm32_pair hi lo => OK (Ploadsymbol_ofs R20 id (Ptrofs.of_int (Int.shl hi (Int.repr 12))) ::
-                                    mk_instr R20 (Ofsimm (Ptrofs.of_int lo)) :: k)
-        end *)
   | Ainstack ofs, nil =>
       OK (indexed_memory_access mk_instr SP ofs k)
   | _, _ =>
