@@ -120,7 +120,6 @@ Remark loadimm32_label:
 Proof.
   intros; unfold loadimm32. destruct (make_immed32 n); TailNoLabel.
   unfold load_hilo32. destruct (Int.eq (Int.zero_ext 12 (Int.add (Int.shl hi (Int.repr 12)) lo)) Int.zero); TailNoLabel.
-  destruct (Int.eq (Int.zero_ext 12 (Int.add (Int.shl hi (Int.repr 12)) lo)) (Int.add (Int.shl hi (Int.repr 12)) lo)); TailNoLabel.
 Qed.
 Hint Resolve loadimm32_label: labels.
 
@@ -132,7 +131,6 @@ Remark opsi32_label:
 Proof.
   intros; unfold opsi32. destruct (make_immed32 n); TailNoLabel.
   unfold load_hilo32. destruct (Int.eq (Int.zero_ext 12 (Int.add (Int.shl hi (Int.repr 12)) lo)) Int.zero); TailNoLabel.
-  destruct (Int.eq (Int.zero_ext 12 (Int.add (Int.shl hi (Int.repr 12)) lo)) (Int.add (Int.shl hi (Int.repr 12)) lo)); TailNoLabel.
 Qed.
 Hint Resolve opsi32_label: labels.
 
@@ -145,7 +143,6 @@ Proof.
   intros; unfold opui32. destruct (Int.eq n (Int.zero_ext 12 n)); TailNoLabel.
   unfold loadimm32. destruct (make_immed32 n); TailNoLabel.
   unfold load_hilo32. destruct (Int.eq (Int.zero_ext 12 (Int.add (Int.shl hi (Int.repr 12)) lo)) Int.zero); TailNoLabel.
-  destruct (Int.eq (Int.zero_ext 12 (Int.add (Int.shl hi (Int.repr 12)) lo)) (Int.add (Int.shl hi (Int.repr 12)) lo)); TailNoLabel.
 Qed.
 Hint Resolve opui32_label: labels.
 
@@ -153,21 +150,7 @@ Remark loadimm64_label:
   forall r n k, tail_nolabel k (loadimm64 r n k).
 Proof.
   intros; unfold loadimm64. destruct (make_immed64 n); TailNoLabel.
-  unfold load_hilo64. unfold load_lolo64.
-  destruct (Int64.eq (Int64.zero_ext 12 (Int64.add (Int64.sign_ext 32 (Int64.shl hi (Int64.repr 12))) lo)) Int64.zero); TailNoLabel.
-  destruct (Int64.eq (Int64.shr (Int64.add (Int64.sign_ext 32 (Int64.shl hi (Int64.repr 12))) lo) (Int64.repr 12)) Int64.zero); TailNoLabel.
-  unfold load_large64.
-  destruct (Int64.eq hi20 (Int64.shr (Int64.sign_ext 20 lo20) (Int64.repr 44))); TailNoLabel.
-  unfold load_lolo64.
-  destruct (Int64.eq lo12 Int64.zero); TailNoLabel.
-  destruct (Int64.eq lo20 Int64.zero); TailNoLabel.
-  destruct (Int64.eq hi12 (Int64.shr (Int64.sign_ext 20 hi20) (Int64.repr 52))); TailNoLabel.
-  unfold load_lolo64.
-  destruct (Int64.eq lo12 Int64.zero); TailNoLabel.
-  destruct (Int64.eq lo20 Int64.zero); TailNoLabel.
-  unfold load_lolo64.
-  destruct (Int64.eq lo12 Int64.zero); TailNoLabel.
-  destruct (Int64.eq lo20 Int64.zero); TailNoLabel.
+  unfold load_hilo64. destruct (Int64.eq lo Int64.zero); TailNoLabel.
 Qed.
 Hint Resolve loadimm64_label: labels.
 
@@ -178,23 +161,9 @@ Remark opsi64_label:
   tail_nolabel k (opsi64 op opimm r1 r2 n k).
 Proof.
   intros; unfold opsi64. destruct (make_immed64 n); TailNoLabel.
-  unfold load_hilo64. unfold load_lolo64.
-  destruct (Int64.eq (Int64.zero_ext 12 (Int64.add (Int64.sign_ext 32 (Int64.shl hi (Int64.repr 12))) lo)) Int64.zero); TailNoLabel.
-  destruct (Int64.eq (Int64.shr (Int64.add (Int64.sign_ext 32 (Int64.shl hi (Int64.repr 12))) lo) (Int64.repr 12)) Int64.zero); TailNoLabel.
-  unfold load_large64.
-  destruct (Int64.eq hi20 (Int64.shr (Int64.sign_ext 20 lo20) (Int64.repr 44))); TailNoLabel.
-  unfold load_lolo64.
-  destruct (Int64.eq lo12 Int64.zero); TailNoLabel.
-  destruct (Int64.eq lo20 Int64.zero); TailNoLabel.
-  destruct (Int64.eq hi12 (Int64.shr (Int64.sign_ext 20 hi20) (Int64.repr 52))); TailNoLabel.
-  unfold load_lolo64.
-  destruct (Int64.eq lo12 Int64.zero); TailNoLabel.
-  destruct (Int64.eq lo20 Int64.zero); TailNoLabel.
-  unfold load_lolo64.
-  destruct (Int64.eq lo12 Int64.zero); TailNoLabel.
-  destruct (Int64.eq lo20 Int64.zero); TailNoLabel.
+  unfold load_hilo64. destruct (Int64.eq lo Int64.zero); TailNoLabel.
 Qed.
-Hint Resolve opsi64_label: labels.
+Hint Resolve opsi64_label: labels. 
 
 Remark opui64_label:
   forall op opimm r1 r2 n k,
@@ -204,21 +173,7 @@ Remark opui64_label:
 Proof.
   intros; unfold opui64. destruct (Int64.eq n (Int64.zero_ext 12 n)); TailNoLabel.
   unfold loadimm64. destruct (make_immed64 n); TailNoLabel.
-  unfold load_hilo64. unfold load_lolo64.
-  destruct (Int64.eq (Int64.zero_ext 12 (Int64.add (Int64.sign_ext 32 (Int64.shl hi (Int64.repr 12))) lo)) Int64.zero); TailNoLabel.
-  destruct (Int64.eq (Int64.shr (Int64.add (Int64.sign_ext 32 (Int64.shl hi (Int64.repr 12))) lo) (Int64.repr 12)) Int64.zero); TailNoLabel.
-  unfold load_large64.
-  destruct (Int64.eq hi20 (Int64.shr (Int64.sign_ext 20 lo20) (Int64.repr 44))); TailNoLabel.
-  unfold load_lolo64.
-  destruct (Int64.eq lo12 Int64.zero); TailNoLabel.
-  destruct (Int64.eq lo20 Int64.zero); TailNoLabel.
-  destruct (Int64.eq hi12 (Int64.shr (Int64.sign_ext 20 hi20) (Int64.repr 52))); TailNoLabel.
-  unfold load_lolo64.
-  destruct (Int64.eq lo12 Int64.zero); TailNoLabel.
-  destruct (Int64.eq lo20 Int64.zero); TailNoLabel.
-  unfold load_lolo64.
-  destruct (Int64.eq lo12 Int64.zero); TailNoLabel.
-  destruct (Int64.eq lo20 Int64.zero); TailNoLabel.
+  unfold load_hilo64. destruct (Int64.eq lo Int64.zero); TailNoLabel.
 Qed.
 Hint Resolve opui64_label: labels.
 
@@ -366,18 +321,6 @@ Proof.
   unfold indexed_memory_access; intros. 
   destruct Archi.ptr64.
   destruct (make_immed64 (Ptrofs.to_int64 ofs)); TailNoLabel.
-  unfold load_large64.
-  destruct (Int64.eq hi20 (Int64.shr (Int64.sign_ext 20 lo20) (Int64.repr 44))); TailNoLabel.
-  unfold load_lolo64.
-  destruct (Int64.eq lo12 Int64.zero); TailNoLabel.
-  destruct (Int64.eq lo20 Int64.zero); TailNoLabel.
-  destruct (Int64.eq hi12 (Int64.shr (Int64.sign_ext 20 hi20) (Int64.repr 52))); TailNoLabel.
-  unfold load_lolo64.
-  destruct (Int64.eq lo12 Int64.zero); TailNoLabel.
-  destruct (Int64.eq lo20 Int64.zero); TailNoLabel.
-  unfold load_lolo64.
-  destruct (Int64.eq lo12 Int64.zero); TailNoLabel.
-  destruct (Int64.eq lo20 Int64.zero); TailNoLabel.
   destruct (make_immed32 (Ptrofs.to_int ofs)); TailNoLabel.
 Qed.
 
@@ -416,7 +359,7 @@ Remark transl_memory_access_label:
   tail_nolabel k c.
 Proof.
   unfold transl_memory_access; intros; destruct addr; TailNoLabel. apply indexed_memory_access_label; auto.
-  destruct make_immed32; TailNoLabel. destruct Archi.ptr64; TailNoLabel. apply indexed_memory_access_label; auto. 
+  destruct make_immed64; TailNoLabel. destruct make_immed32; TailNoLabel. apply indexed_memory_access_label; auto. 
 Qed.
 
 Remark make_epilogue_label:
@@ -1011,11 +954,11 @@ Local Transparent destroyed_by_op.
   set (tfbody := Pallocframe (fn_stacksize f) (fn_link_ofs f) ::
                  storeind_ptr RA SP (fn_retaddr_ofs f) x0) in *.
   set (tf := {| fn_sig := Mach.fn_sig f; fn_code := tfbody |}) in *.
-  set (rs2 := nextinstr (rs0#R19 <- (parent_sp s) #SP <- sp #R20 <- Vundef)).
+  set (rs2 := nextinstr (rs0#R19 <- (parent_sp s) #SP <- sp #R20 <- Vundef #R22 <- Vundef)).
   exploit (storeind_ptr_correct tge tf SP (fn_retaddr_ofs f) RA x0 rs2 m2').
     rewrite chunk_of_Tptr in P. change (rs2 R1) with (rs0 R1). rewrite ATLR. 
     change (rs2 R3) with sp. eexact P. 
-    congruence. congruence.
+    congruence. congruence. congruence.
   intros (rs3 & U & V).
   assert (EXEC_PROLOGUE:
             exec_straight tge tf
@@ -1036,6 +979,7 @@ Local Transparent destroyed_by_op.
   apply agree_exten with rs2; eauto with asmgen.
   unfold rs2. 
   apply agree_nextinstr. apply agree_set_other; auto with asmgen.
+  apply agree_set_other; auto with asmgen.
   apply agree_change_sp with (parent_sp s). 
   apply agree_undef_regs with rs0. auto.
 Local Transparent destroyed_at_function_entry.
